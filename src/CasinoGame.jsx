@@ -192,15 +192,15 @@ const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCo
   // Speech bubble positioning based on player position (inside container, absolutely positioned)
   const speechBubbleClasses = {
     top: 'absolute top-full mt-2 left-1/2 -translate-x-1/2',
-    left: 'absolute left-full ml-2 top-1/2 -translate-y-1/2',
-    right: 'absolute right-full mr-2 top-1/2 -translate-y-1/2',
+    left: 'absolute left-full ml-2 top-full mt-2',
+    right: 'absolute right-full mr-2 top-full mt-2',
   };
 
   // Speech bubble tail positioning
   const speechBubbleTailClasses = {
     top: 'absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white -top-2 left-1/2 -translate-x-1/2',
-    left: 'absolute w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-white -left-2 top-1/2 -translate-y-1/2',
-    right: 'absolute w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-white -right-2 top-1/2 -translate-y-1/2',
+    left: 'absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white -top-2 left-4',
+    right: 'absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white -top-2 right-4',
   };
 
   const displayDeckCount = isDealing ? visualDeckCount : deckCount;
