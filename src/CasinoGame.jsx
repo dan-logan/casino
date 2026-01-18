@@ -1351,7 +1351,7 @@ export default function CasinoGame() {
   }
 
   return (
-    <div className="min-h-screen bg-green-800 p-2 flex flex-col">
+    <div className="min-h-screen bg-green-800 p-2 flex flex-col max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex justify-between items-center mb-1 px-2">
         <div className="text-white text-xs">
@@ -1364,7 +1364,7 @@ export default function CasinoGame() {
       </div>
 
       {/* Game area with positioned players */}
-      <div className="flex-1 relative min-h-[350px]">
+      <div className="relative h-[40vh] md:h-[50vh] min-h-[280px] md:min-h-[400px] max-h-[500px]">
         {/* AI 2 - Top (across from human) */}
         <PlayerHand 
           ref={el => playerRefs.current[2] = el}
@@ -1417,9 +1417,9 @@ export default function CasinoGame() {
         />
 
         {/* Table - Center */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/5 min-w-[180px]">
-          <div ref={tableRef} className={`bg-green-700 rounded-xl p-3 min-h-[120px] ${dealingTo === 'table' ? 'ring-2 ring-yellow-400' : ''}`}>
-            <div className="text-white text-xs mb-2 text-center">Table</div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] md:w-3/5 min-w-[180px] max-w-md">
+          <div ref={tableRef} className={`bg-green-700 rounded-xl p-2 md:p-3 min-h-[100px] md:min-h-[120px] ${dealingTo === 'table' ? 'ring-2 ring-yellow-400' : ''}`}>
+            <div className="text-white text-xs mb-1 md:mb-2 text-center">Table</div>
             <div className="flex flex-wrap gap-2 justify-center items-start">
               {table.map(card => (
                 <Card
@@ -1446,8 +1446,8 @@ export default function CasinoGame() {
       </div>
 
       {/* Player hand area */}
-      <div ref={el => playerRefs.current[0] = el} className={`bg-green-900 rounded-xl p-3 mt-2 relative ${dealingTo === 'player0' ? 'ring-2 ring-yellow-400' : ''}`}>
-        <div className="flex justify-between items-center mb-2">
+      <div ref={el => playerRefs.current[0] = el} className={`bg-green-900 rounded-xl p-2 md:p-3 mt-1 md:mt-2 relative ${dealingTo === 'player0' ? 'ring-2 ring-yellow-400' : ''}`}>
+        <div className="flex justify-between items-center mb-1 md:mb-2">
           <div className="flex items-center gap-2">
             <span className="text-white text-xs">{players[0].captured.length} capt, {players[0].sweeps} sweeps</span>
             {dealer === 0 && <span className="text-yellow-300 text-xs">(Dealer)</span>}
@@ -1462,7 +1462,7 @@ export default function CasinoGame() {
           </div>
         )}
         
-        <div className="flex gap-2 justify-center mb-3 flex-wrap items-center">
+        <div className="flex gap-1 md:gap-2 justify-center mb-2 md:mb-3 flex-wrap items-center">
           {dealer === 0 && (isDealing ? visualDeckCount : deck.length) > 0 && (
             <div className="mr-2" ref={deckRef}>
               <Deck count={isDealing ? visualDeckCount : deck.length} small={false} />
@@ -1505,7 +1505,7 @@ export default function CasinoGame() {
         ))}
 
         {currentPlayer === 0 && !isDealing && (
-          <div className="flex gap-2 justify-center flex-wrap items-center">
+          <div className="flex gap-1 md:gap-2 justify-center flex-wrap items-center">
             <button
               onClick={executeCapture}
               disabled={!canCapture}
