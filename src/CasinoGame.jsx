@@ -189,18 +189,18 @@ const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCo
     right: 'flex-col',
   };
 
-  // Speech bubble positioning based on player position
+  // Speech bubble positioning based on player position (inside container, absolutely positioned)
   const speechBubbleClasses = {
-    top: 'absolute -bottom-10 left-1/2 -translate-x-1/2',
-    left: 'absolute -right-24 top-1/2 -translate-y-1/2',
-    right: 'absolute -left-24 top-1/2 -translate-y-1/2',
+    top: 'absolute top-full mt-2 left-1/2 -translate-x-1/2',
+    left: 'absolute left-full ml-2 top-1/2 -translate-y-1/2',
+    right: 'absolute right-full mr-2 top-1/2 -translate-y-1/2',
   };
 
   // Speech bubble tail positioning
   const speechBubbleTailClasses = {
     top: 'absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white -top-2 left-1/2 -translate-x-1/2',
-    left: 'absolute w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-white -right-2 top-1/2 -translate-y-1/2',
-    right: 'absolute w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-white -left-2 top-1/2 -translate-y-1/2',
+    left: 'absolute w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-white -left-2 top-1/2 -translate-y-1/2',
+    right: 'absolute w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-white -right-2 top-1/2 -translate-y-1/2',
   };
 
   const displayDeckCount = isDealing ? visualDeckCount : deckCount;
@@ -209,38 +209,36 @@ const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCo
   const faceDownCount = revealedCard ? cardCount - 1 : cardCount;
 
   return (
-    <>
-      <div ref={ref} className={`${positionClasses[position]} ${isCurrentPlayer ? 'bg-green-600' : 'bg-green-700/80'} p-2 rounded-lg ${isReceivingCards ? 'ring-2 ring-yellow-400' : ''}`}>
-        <div className="flex items-center justify-center gap-2">
-          <div className="text-white text-xs text-center">{player.name}</div>
-          {isDealer && <div className="text-yellow-300 text-xs">(D)</div>}
-        </div>
-        <div className="text-white text-xs mb-1 text-center opacity-75">{player.captured.length} capt</div>
-        <div className={`flex ${cardContainerClasses[position]} gap-1 justify-center items-center`}>
-          {isDealer && displayDeckCount > 0 && (
-            <div className="mr-1" ref={deckRef}>
-              <Deck count={displayDeckCount} small />
-            </div>
-          )}
-          {Array(Math.max(0, faceDownCount)).fill(0).map((_, j) => (
-            <Card key={j} faceDown small />
-          ))}
-          {revealedCard && (
-            <div className="ring-2 ring-yellow-400 rounded-lg">
-              <Card card={revealedCard} small />
-            </div>
-          )}
-        </div>
+    <div ref={ref} className={`${positionClasses[position]} ${isCurrentPlayer ? 'bg-green-600' : 'bg-green-700/80'} p-2 rounded-lg ${isReceivingCards ? 'ring-2 ring-yellow-400' : ''}`}>
+      <div className="flex items-center justify-center gap-2">
+        <div className="text-white text-xs text-center">{player.name}</div>
+        {isDealer && <div className="text-yellow-300 text-xs">(D)</div>}
+      </div>
+      <div className="text-white text-xs mb-1 text-center opacity-75">{player.captured.length} capt</div>
+      <div className={`flex ${cardContainerClasses[position]} gap-1 justify-center items-center`}>
+        {isDealer && displayDeckCount > 0 && (
+          <div className="mr-1" ref={deckRef}>
+            <Deck count={displayDeckCount} small />
+          </div>
+        )}
+        {Array(Math.max(0, faceDownCount)).fill(0).map((_, j) => (
+          <Card key={j} faceDown small />
+        ))}
+        {revealedCard && (
+          <div className="ring-2 ring-yellow-400 rounded-lg">
+            <Card card={revealedCard} small />
+          </div>
+        )}
       </div>
 
-      {/* Speech bubble - positioned outside the player container */}
+      {/* Speech bubble - positioned absolutely relative to this container */}
       {message && (
         <div className={`${speechBubbleClasses[position]} bg-white text-gray-800 text-xs px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-30`}>
           {message}
           <div className={speechBubbleTailClasses[position]}></div>
         </div>
       )}
-    </>
+    </div>
   );
 });
 
