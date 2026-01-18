@@ -209,7 +209,7 @@ const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCo
   const faceDownCount = revealedCard ? cardCount - 1 : cardCount;
 
   return (
-    <div ref={ref} className={`${positionClasses[position]} ${isCurrentPlayer ? 'bg-green-600' : 'bg-green-700/80'} p-2 rounded-lg ${isReceivingCards ? 'ring-2 ring-yellow-400' : ''}`}>
+    <div ref={ref} className={`${positionClasses[position]} ${isCurrentPlayer ? 'bg-green-600' : 'bg-green-700/80'} p-2 rounded-lg ${isReceivingCards ? 'ring-2 ring-yellow-400' : ''} z-20`}>
       <div className="flex items-center justify-center gap-2">
         <div className="text-white text-xs text-center">{player.name}</div>
         {isDealer && <div className="text-yellow-300 text-xs">(D)</div>}
