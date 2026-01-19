@@ -1591,6 +1591,8 @@ export default function CasinoGame() {
               selected={selectedHandCard?.id === card.id}
               onClick={currentPlayer === 0 && !isDealing ? () => {
                 setSelectedHandCard(selectedHandCard?.id === card.id ? null : card);
+                setSelectedTableCards([]);
+                setSelectedBuilds([]);
                 if (buildMode) {
                   setBuildMode(false);
                   setBuildValue(null);
