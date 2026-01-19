@@ -244,6 +244,9 @@ const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCo
 
 export default function CasinoGame() {
   const [gameState, setGameState] = useState('setup');
+  const [dealerSelectionMode, setDealerSelectionMode] = useState(null); // null, 'spinning', 'selected'
+  const [spinningIndex, setSpinningIndex] = useState(0);
+  const [selectedDealer, setSelectedDealer] = useState(null);
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([
     { name: 'You', hand: [], captured: [], sweeps: 0, isHuman: true },
@@ -394,9 +397,58 @@ export default function CasinoGame() {
     setTimeout(dealNextCard, 300);
   }, []);
 
+  const handleRandomDealer = () => {
+    setDealerSelectionMode('spinning');
+    setSpinningIndex(0);
+
+    // Select the final dealer upfront
+    const finalDealer = Math.floor(Math.random() * 4);
+
+    // Spin animation - cycle through players quickly
+    let currentIndex = 0;
+    let spinCount = 0;
+    const maxSpins = 16; // Total number of spins before stopping
+
+    const spin = () => {
+      if (spinCount >= maxSpins) {
+        // Stop at the final dealer
+        setSpinningIndex(finalDealer);
+        setSelectedDealer(finalDealer);
+        setDealerSelectionMode('selected');
+
+        // Wait a moment to show the selected dealer, then start game
+        setTimeout(() => {
+          startGame(finalDealer);
+        }, 1500);
+        return;
+      }
+
+      currentIndex = (currentIndex + 1) % 4;
+      setSpinningIndex(currentIndex);
+      spinCount++;
+
+      // Gradually slow down the spinning
+      const delay = 80 + (spinCount * 15);
+      setTimeout(spin, delay);
+    };
+
+    // Start spinning
+    setTimeout(spin, 100);
+  };
+
+  const handleChooseDealer = (dealerIndex) => {
+    setSelectedDealer(dealerIndex);
+    setDealerSelectionMode('selected');
+
+    // Start game immediately when user chooses to be dealer
+    setTimeout(() => {
+      startGame(dealerIndex);
+    }, 500);
+  };
+
   const startGame = useCallback((newDealer = dealer) => {
     const shuffled = shuffleDeck(createDeck());
-    
+
     setDeck(shuffled);
     setVisualDeckCount(52);
     setPlayers(players.map(p => ({ ...p, hand: [], captured: [], sweeps: 0 })));
@@ -416,7 +468,9 @@ export default function CasinoGame() {
     setBuildMode(false);
     setBuildValue(null);
     setPlayerMessages(['', '', '', '']);
-    
+    setDealerSelectionMode(null);
+    setSelectedDealer(null);
+
     // Start dealing animation
     animateDeal(
       shuffled,
@@ -1292,16 +1346,61 @@ export default function CasinoGame() {
   if (gameState === 'setup') {
     return (
       <div className="min-h-screen bg-green-800 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl p-8 shadow-2xl text-center max-w-sm">
+        <div className="bg-white rounded-xl p-8 shadow-2xl text-center max-w-md">
           <h1 className="text-3xl font-bold mb-4">Casino</h1>
           <p className="text-gray-600 mb-6">You vs 3 AI players</p>
-          <p className="text-sm text-gray-500 mb-4">First to {targetScore} points wins!</p>
-          <button
-            onClick={() => startGame(0)}
-            className="bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700"
-          >
-            Start Game
-          </button>
+          <p className="text-sm text-gray-500 mb-6">First to {targetScore} points wins!</p>
+
+          {!dealerSelectionMode && (
+            <div className="space-y-4">
+              <p className="text-gray-700 font-semibold mb-4">Choose dealer:</p>
+              <button
+                onClick={() => handleChooseDealer(0)}
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
+              >
+                I'll be the dealer
+              </button>
+              <button
+                onClick={handleRandomDealer}
+                className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-purple-700 transition"
+              >
+                Random dealer
+              </button>
+            </div>
+          )}
+
+          {(dealerSelectionMode === 'spinning' || dealerSelectionMode === 'selected') && (
+            <div className="space-y-6">
+              <p className="text-gray-700 font-semibold">
+                {dealerSelectionMode === 'spinning' ? 'Selecting dealer...' : 'Dealer selected!'}
+              </p>
+
+              {/* Spinner Animation */}
+              <div className="grid grid-cols-2 gap-4 py-4">
+                {players.map((player, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                      spinningIndex === idx
+                        ? dealerSelectionMode === 'selected'
+                          ? 'bg-yellow-400 border-yellow-600 scale-110 shadow-lg'
+                          : 'bg-blue-400 border-blue-600 scale-105'
+                        : 'bg-gray-100 border-gray-300'
+                    }`}
+                  >
+                    <div className="font-semibold text-gray-800">{player.name}</div>
+                    {spinningIndex === idx && dealerSelectionMode === 'selected' && (
+                      <div className="text-yellow-800 text-sm font-bold mt-1">DEALER</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {dealerSelectionMode === 'selected' && (
+                <p className="text-sm text-gray-600">Starting game...</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
