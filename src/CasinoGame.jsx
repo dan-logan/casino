@@ -1533,7 +1533,7 @@ export default function CasinoGame() {
         />
 
         {/* Table - Center */}
-        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 w-[70%] md:w-3/5 min-w-[180px] max-w-[400px]">
+        <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[70%] md:w-3/5 min-w-[180px] max-w-[400px]">
           <div ref={tableRef} className={`bg-green-700 rounded-xl p-2 md:p-3 min-h-[100px] md:min-h-[120px] ${dealingTo === 'table' ? 'ring-2 ring-yellow-400' : ''}`}>
             <div className="text-white text-xs mb-1 md:mb-2 text-center">Table</div>
             <div className="flex flex-wrap gap-2 justify-center items-start">
