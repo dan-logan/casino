@@ -95,21 +95,21 @@ const FlyingCard = ({ startPos, endPos }) => {
       if (window._onCardArrived) {
         window._onCardArrived();
       }
-    }, 500);
-    
+    }, 300);
+
     return () => {
       clearTimeout(timeout);
       clearTimeout(completeTimeout);
     };
   }, [endPos]);
-  
+
   return (
-    <div 
+    <div
       className="fixed w-10 h-14 bg-blue-800 rounded-lg border-2 border-blue-900 flex items-center justify-center z-50 shadow-lg"
       style={{
         left: position.x,
         top: position.y,
-        transition: 'left 0.45s ease-out, top 0.45s ease-out',
+        transition: 'left 0.25s ease-out, top 0.25s ease-out',
       }}
     >
       <div className="text-blue-600 text-xs">♠♥</div>
@@ -364,16 +364,16 @@ export default function CasinoGame() {
       
       setFlyingCard(null);
       stepIndex++;
-      
+
       // Small delay before next card
-      setTimeout(dealNextCard, 100);
+      setTimeout(dealNextCard, 60);
     };
-    
+
     // Store callback for flying card completion
     window._onCardArrived = onCardArrived;
-    
+
     // Start dealing
-    setTimeout(dealNextCard, 300);
+    setTimeout(dealNextCard, 150);
   }, []);
 
   const handleRandomDealer = () => {
