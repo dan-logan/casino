@@ -176,7 +176,7 @@ const Build = React.forwardRef(({ build, onClick, selected }, ref) => {
   );
 });
 
-const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCount, message, isDealer, deckCount, visualDeckCount, isDealing, isReceivingCards, deckRef, revealedCard }, ref) => {
+const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCount, isDealer, deckCount, visualDeckCount, isDealing, isReceivingCards, deckRef, revealedCard }, ref) => {
   const positionClasses = {
     top: 'absolute top-0 left-1/2 -translate-x-1/2',
     left: 'absolute left-0 top-1/2 -translate-y-1/2',
@@ -187,20 +187,6 @@ const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCo
     top: 'flex-row',
     left: 'flex-col',
     right: 'flex-col',
-  };
-
-  // Speech bubble positioning based on player position (inside container, absolutely positioned)
-  const speechBubbleClasses = {
-    top: 'absolute top-full mt-2 left-1/2 -translate-x-1/2',
-    left: 'absolute left-full ml-2 top-full mt-2',
-    right: 'absolute right-full mr-2 top-full mt-2',
-  };
-
-  // Speech bubble tail positioning
-  const speechBubbleTailClasses = {
-    top: 'absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white -top-2 left-1/2 -translate-x-1/2',
-    left: 'absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white -top-2 left-4',
-    right: 'absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white -top-2 right-4',
   };
 
   const displayDeckCount = isDealing ? visualDeckCount : deckCount;
@@ -230,14 +216,6 @@ const PlayerHand = React.forwardRef(({ player, position, isCurrentPlayer, cardCo
           </div>
         )}
       </div>
-
-      {/* Speech bubble - positioned absolutely relative to this container */}
-      {message && (
-        <div className={`${speechBubbleClasses[position]} bg-white text-gray-800 text-xs px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-30`}>
-          {message}
-          <div className={speechBubbleTailClasses[position]}></div>
-        </div>
-      )}
     </div>
   );
 });
@@ -271,6 +249,7 @@ export default function CasinoGame() {
   const [dealer, setDealer] = useState(0);
   const [firstPlayer, setFirstPlayer] = useState(1);
   const [playerMessages, setPlayerMessages] = useState(['', '', '', '']);
+  const [lastPlayedCards, setLastPlayedCards] = useState([null, null, null, null]); // Track last card each player played
   const [isDealing, setIsDealing] = useState(false);
   const [dealingTo, setDealingTo] = useState(null); // 'player0', 'player1', 'player2', 'player3', 'table'
   const [flyingCard, setFlyingCard] = useState(null); // { startPos, endPos, key }
@@ -468,6 +447,7 @@ export default function CasinoGame() {
     setBuildMode(false);
     setBuildValue(null);
     setPlayerMessages(['', '', '', '']);
+    setLastPlayedCards([null, null, null, null]);
     setDealerSelectionMode(null);
     setSelectedDealer(null);
 
@@ -564,7 +544,11 @@ export default function CasinoGame() {
     const newMessages = [...playerMessages];
     newMessages[currentPlayer] = msg;
     setPlayerMessages(newMessages);
-    
+
+    const newLastPlayed = [...lastPlayedCards];
+    newLastPlayed[currentPlayer] = selectedHandCard;
+    setLastPlayedCards(newLastPlayed);
+
     newPlayers[currentPlayer] = player;
     setPlayers(newPlayers);
     setTable(newTable);
@@ -574,7 +558,7 @@ export default function CasinoGame() {
     setSelectedTableCards([]);
     setSelectedBuilds([]);
     setMessage(msg);
-    
+
     nextTurn(newPlayers, newTable, newBuilds);
   };
 
@@ -621,7 +605,11 @@ export default function CasinoGame() {
       const newMessages = [...playerMessages];
       newMessages[currentPlayer] = msg;
       setPlayerMessages(newMessages);
-      
+
+      const newLastPlayed = [...lastPlayedCards];
+      newLastPlayed[currentPlayer] = selectedHandCard;
+      setLastPlayedCards(newLastPlayed);
+
       setPlayers(newPlayers);
       setTable(newTable);
       setBuilds(newBuilds);
@@ -631,7 +619,7 @@ export default function CasinoGame() {
       setBuildMode(false);
       setBuildValue(null);
       setMessage(msg);
-      
+
       nextTurn(newPlayers, newTable, newBuilds);
     } else {
       // Numeric build
@@ -677,7 +665,11 @@ export default function CasinoGame() {
       const newMessages = [...playerMessages];
       newMessages[currentPlayer] = msg;
       setPlayerMessages(newMessages);
-      
+
+      const newLastPlayed = [...lastPlayedCards];
+      newLastPlayed[currentPlayer] = selectedHandCard;
+      setLastPlayedCards(newLastPlayed);
+
       setPlayers(newPlayers);
       setTable(newTable);
       setBuilds(newBuilds);
@@ -687,7 +679,7 @@ export default function CasinoGame() {
       setBuildMode(false);
       setBuildValue(null);
       setMessage(msg);
-      
+
       nextTurn(newPlayers, newTable, newBuilds);
     }
   };
@@ -713,13 +705,17 @@ export default function CasinoGame() {
     const newMessages = [...playerMessages];
     newMessages[currentPlayer] = msg;
     setPlayerMessages(newMessages);
-    
+
+    const newLastPlayed = [...lastPlayedCards];
+    newLastPlayed[currentPlayer] = selectedHandCard;
+    setLastPlayedCards(newLastPlayed);
+
     setPlayers(newPlayers);
     setTable(newTable);
     setSelectedHandCard(null);
     setSelectedTableCards([]);
     setMessage(msg);
-    
+
     nextTurn(newPlayers, newTable, builds);
   };
 
@@ -828,11 +824,11 @@ export default function CasinoGame() {
 
   // Execute the pending AI action after animation completes
   const executeAiAction = useCallback((action) => {
-    const { type, newPlayers, newTable, newBuilds, msg, playerIndex } = action;
-    
+    const { type, card, newPlayers, newTable, newBuilds, msg, playerIndex } = action;
+
     setAiRevealedCard(null);
     setAiAnimatingCards([]);
-    
+
     const setAiMessage = (msg) => {
       setPlayerMessages(prev => {
         const newMessages = [...prev];
@@ -840,16 +836,24 @@ export default function CasinoGame() {
         return newMessages;
       });
     };
-    
+
     setAiMessage(msg);
+
+    // Track the last played card for this AI player
+    setLastPlayedCards(prev => {
+      const newLastPlayed = [...prev];
+      newLastPlayed[playerIndex] = card;
+      return newLastPlayed;
+    });
+
     setPlayers(newPlayers);
     setTable(newTable);
     setBuilds(newBuilds);
-    
+
     if (type === 'capture') {
       setLastCapturer(playerIndex);
     }
-    
+
     setMessage(`${players[playerIndex].name}: ${msg}`);
     nextTurn(newPlayers, newTable, newBuilds);
   }, [nextTurn, players]);
@@ -1482,13 +1486,12 @@ export default function CasinoGame() {
       {/* Game area with positioned players */}
       <div className="relative h-[40vh] md:h-[50vh] min-h-[280px] md:min-h-[400px] max-h-[500px]">
         {/* AI 2 - Top (across from human) */}
-        <PlayerHand 
+        <PlayerHand
           ref={el => playerRefs.current[2] = el}
-          player={players[2]} 
-          position="top" 
+          player={players[2]}
+          position="top"
           isCurrentPlayer={currentPlayer === 2}
           cardCount={players[2].hand.length}
-          message={playerMessages[2]}
           isDealer={dealer === 2}
           deckCount={deck.length}
           visualDeckCount={visualDeckCount}
@@ -1497,15 +1500,14 @@ export default function CasinoGame() {
           deckRef={dealer === 2 ? deckRef : null}
           revealedCard={aiRevealedCard?.playerIndex === 2 ? aiRevealedCard.card : null}
         />
-        
+
         {/* AI 1 - Left (plays after human) */}
-        <PlayerHand 
+        <PlayerHand
           ref={el => playerRefs.current[1] = el}
-          player={players[1]} 
-          position="left" 
+          player={players[1]}
+          position="left"
           isCurrentPlayer={currentPlayer === 1}
           cardCount={players[1].hand.length}
-          message={playerMessages[1]}
           isDealer={dealer === 1}
           deckCount={deck.length}
           visualDeckCount={visualDeckCount}
@@ -1514,15 +1516,14 @@ export default function CasinoGame() {
           deckRef={dealer === 1 ? deckRef : null}
           revealedCard={aiRevealedCard?.playerIndex === 1 ? aiRevealedCard.card : null}
         />
-        
+
         {/* AI 3 - Right (plays after AI 2) */}
-        <PlayerHand 
+        <PlayerHand
           ref={el => playerRefs.current[3] = el}
-          player={players[3]} 
-          position="right" 
+          player={players[3]}
+          position="right"
           isCurrentPlayer={currentPlayer === 3}
           cardCount={players[3].hand.length}
-          message={playerMessages[3]}
           isDealer={dealer === 3}
           deckCount={deck.length}
           visualDeckCount={visualDeckCount}
@@ -1533,10 +1534,10 @@ export default function CasinoGame() {
         />
 
         {/* Table - Center */}
-        <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[70%] md:w-3/5 min-w-[180px] max-w-[400px]">
-          <div ref={tableRef} className={`bg-green-700 rounded-xl p-2 md:p-3 min-h-[100px] md:min-h-[120px] ${dealingTo === 'table' ? 'ring-2 ring-yellow-400' : ''}`}>
-            <div className="text-white text-xs mb-1 md:mb-2 text-center">Table</div>
-            <div className="flex flex-wrap gap-2 justify-center items-start">
+        <div className="absolute top-[45%] left-1/2 -translate-x-1/2">
+          <div ref={tableRef} className={`bg-green-700 rounded-xl p-2 min-h-[80px] w-[200px] ${dealingTo === 'table' ? 'ring-2 ring-yellow-400' : ''}`}>
+            <div className="text-white text-xs mb-1 text-center">Table</div>
+            <div className="grid grid-cols-4 gap-1 justify-items-center">
               {table.map(card => (
                 <Card
                   key={card.id}
@@ -1570,14 +1571,7 @@ export default function CasinoGame() {
           </div>
           <span className="text-yellow-300 text-xs">{currentPlayer === 0 && !isDealing ? 'Your turn' : message}</span>
         </div>
-        
-        {playerMessages[0] && currentPlayer !== 0 && (
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-gray-800 text-xs px-2 py-1 rounded-lg shadow-md whitespace-nowrap z-20">
-            {playerMessages[0]}
-            <div className="absolute w-2 h-2 bg-white transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2"></div>
-          </div>
-        )}
-        
+
         <div className="flex gap-1 md:gap-2 justify-center mb-2 md:mb-3 flex-wrap items-center">
           {dealer === 0 && (isDealing ? visualDeckCount : deck.length) > 0 && (
             <div className="mr-2" ref={deckRef}>
@@ -1689,6 +1683,28 @@ export default function CasinoGame() {
             </button>
           </div>
         )}
+      </div>
+
+      {/* Table Chat - Shows last action for each player */}
+      <div className="bg-green-900/80 rounded-xl p-2 mt-1">
+        <div className="text-white text-xs font-semibold mb-1">Table Chat</div>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs">
+          {players.map((player, idx) => (
+            <div key={idx} className="flex items-center gap-1 text-white/90">
+              <span className={`font-medium ${currentPlayer === idx ? 'text-yellow-300' : ''}`}>{player.name}:</span>
+              {lastPlayedCards[idx] ? (
+                <>
+                  <span className={`${lastPlayedCards[idx].suit === '♥' || lastPlayedCards[idx].suit === '♦' ? 'text-red-400' : 'text-white'}`}>
+                    [{lastPlayedCards[idx].rank}{lastPlayedCards[idx].suit}]
+                  </span>
+                  <span className="text-white/70 truncate">- {playerMessages[idx] || '...'}</span>
+                </>
+              ) : (
+                <span className="text-white/50">-</span>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
