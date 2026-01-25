@@ -559,7 +559,7 @@ export default function CasinoGame() {
     setSelectedBuilds([]);
     setMessage(msg);
 
-    nextTurn(newPlayers, newTable, newBuilds);
+    nextTurn(newPlayers, newTable, newBuilds, currentPlayer);
   };
 
   const executeBuild = () => {
@@ -719,12 +719,14 @@ export default function CasinoGame() {
     nextTurn(newPlayers, newTable, builds);
   };
 
-  const nextTurn = useCallback((currentPlayers, currentTable, currentBuilds) => {
+  const nextTurn = useCallback((currentPlayers, currentTable, currentBuilds, capturer = null) => {
     const allHandsEmpty = currentPlayers.every(p => p.hand.length === 0);
-    
+
     if (allHandsEmpty) {
       if (isLastDeal) {
-        endRound(currentPlayers, currentTable, currentBuilds);
+        // Pass the capturer (use passed value if provided, otherwise fall back to state)
+        const effectiveCapturer = capturer !== null ? capturer : lastCapturer;
+        endRound(currentPlayers, currentTable, currentBuilds, effectiveCapturer);
         return;
       } else {
         // Deal new cards with animation (not initial, so no table cards)
@@ -755,19 +757,19 @@ export default function CasinoGame() {
     if (nextP === 0) {
       setMessage('Your turn');
     }
-  }, [currentPlayer, deck, isLastDeal, dealer, animateDeal, firstPlayer]);
+  }, [currentPlayer, deck, isLastDeal, dealer, animateDeal, firstPlayer, lastCapturer]);
 
-  const endRound = (finalPlayers, finalTable, finalBuilds) => {
+  const endRound = (finalPlayers, finalTable, finalBuilds, lastCapturerParam) => {
     const newPlayers = [...finalPlayers];
-    
-    if (lastCapturer !== null) {
+
+    if (lastCapturerParam !== null) {
       const remaining = [...finalTable];
       for (const build of finalBuilds) {
         remaining.push(...build.cards);
       }
-      newPlayers[lastCapturer] = {
-        ...newPlayers[lastCapturer],
-        captured: [...newPlayers[lastCapturer].captured, ...remaining]
+      newPlayers[lastCapturerParam] = {
+        ...newPlayers[lastCapturerParam],
+        captured: [...newPlayers[lastCapturerParam].captured, ...remaining]
       };
     }
     
@@ -855,7 +857,8 @@ export default function CasinoGame() {
     }
 
     setMessage(`${players[playerIndex].name}: ${msg}`);
-    nextTurn(newPlayers, newTable, newBuilds);
+    // Pass the capturer if this was a capture move
+    nextTurn(newPlayers, newTable, newBuilds, type === 'capture' ? playerIndex : null);
   }, [nextTurn, players]);
 
   // Start animation for AI move
